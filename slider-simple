@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Image/Text Slider with Thumbnails</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+  <div id="slider-container" class="max-w-2xl w-full mx-auto"></div>
+
+  <script>
+    const slides = [
+      {
+        image: "https://placekitten.com/300/200",
+        text: "This is the first slide. Cute kitten!",
+      },
+      {
+        image: "https://placekitten.com/301/200",
+        text: "Here is the second slide. Another kitten!",
+      },
+      {
+        image: "https://placekitten.com/302/200",
+        text: "Third slide, more kitten goodness.",
+      },
+      {
+        image: "https://placekitten.com/303/200",
+        text: "Fourth slide. You get the idea.",
+      },
+      {
+        image: "https://placekitten.com/304/200",
+        text: "Fifth slide, just to show overflow.",
+      }
+    ];
+
+    const MAX_VISIBLE_BUTTONS = 4;
+    let current = 0;
+
+    function renderSlider() {
+      const sliderContainer = document.getElementById("slider-container");
+
+      // Calculate visible button range
+      let start = 0;
+      if (current > MAX_VISIBLE_BUTTONS - 1) {
+        start = current - (MAX_VISIBLE_BUTTONS - 1);
+      }
+      const end = Math.min(start + MAX_VISIBLE_BUTTONS, slides.length);
+
+      sliderContainer.innerHTML = `
+        <div class="flex bg-white rounded-2xl shadow-lg overflow-hidden">
+          <img src="${slides[current].image}" alt="Slide ${current+1}" class="w-1/2 object-cover">
+          <div class="w-1/2 p-6 flex items-center text-lg">${slides[current].text}</div>
+        </div>
+        <div class="flex justify-center mt-4 gap-2">
+          <button
+            ${current === 0 ? 'disabled' : ''}
+            class="px-2 py-1 rounded-lg bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
+            onclick="goToSlide(${current - 1})"
+          >Prev</button>
+          ${slides.slice(start, end).map((slide, idx) => {
+            const slideIndex = start + idx;
+            return `
+              <button
+                class="
+                  flex items-center justify-center
+                  ${slideIndex === current
+                    ? 'ring-4 ring-blue-400 bg-blue-100 scale-110'
+                    : 'bg-gray-200 hover:bg-gray-300'}
+                  w-12 h-12 rounded-full overflow-hidden transition-all duration-150
+                "
+                style="padding:0;"
+                onclick="goToSlide(${slideIndex})"
+                aria-label="Go to slide ${slideIndex + 1}"
+              >
+                <img
+                  src="${slide.image}"
+                  alt="Slide ${slideIndex + 1}"
+                  class="object-cover w-full h-full"
+                />
+              </button>
+            `;
+          }).join('')}
+          <button
+            ${current === slides.length - 1 ? 'disabled' : ''}
+            class="px-2 py-1 rounded-lg bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
+            onclick="goToSlide(${current + 1})"
+          >Next</button>
+        </div>
+      `;
+    }
+
+    // Navigation function must be global for onclick
+    window.goToSlide = function(index) {
+      if (index < 0 || index >= slides.length) return;
+      current = index;
+      renderSlider();
+    };
+
+    // Initial render
+    renderSlider();
+  </script>
+</body>
+</html>
